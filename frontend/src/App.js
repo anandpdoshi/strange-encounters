@@ -1,0 +1,36 @@
+import React, { Component } from 'react';
+import logo from './logo.svg';
+import './App.css';
+
+class App extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            isLoading: true
+        }
+    }
+
+    componentDidMount() {
+        return fetch('/api')
+            .then((response) => response.text())
+            .then((responseText) => {
+                console.log(responseText);
+            })
+    }
+
+    render() {
+        return (
+            <div className="App">
+                <header className="App-header">
+                    <img src={logo} className="App-logo" alt="logo" />
+                    <h1 className="App-title">Welcome to React</h1>
+                </header>
+                <p className="App-intro">
+                    To get started, edit <code>src/App.js</code> and save to reload.
+                </p>
+            </div>
+        );
+    }
+}
+
+export default App;
