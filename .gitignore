@@ -1,3 +1,5 @@
 .DS_Store
 env/
 frontend.bak/
+
+venv/
