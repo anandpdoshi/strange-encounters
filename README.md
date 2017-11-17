@@ -3,6 +3,7 @@
 ### Dependencies
 - Python 3
 - VirtualEnv
+- PostgreSQL Database
 
 ### Installation
 ```
@@ -13,6 +14,10 @@ cd frontend
 npm install
 ```
 
+Set the following environment variables for postgres database connection:
+- RDS_USERNAME
+- RDS_PASSWORD
+- RDS_DB_NAME
 
 ### Running it
 ```
