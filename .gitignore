@@ -3,3 +3,4 @@ env/
 frontend.bak/
 venv/
 server/config.py
+__pycache__/
