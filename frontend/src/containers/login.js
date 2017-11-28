@@ -6,8 +6,7 @@ import { Link } from 'react-router-dom';
 import { handleChange, handleLogin } from '../modules/auth';
 
 const Login = (props) => {
-    console.log(props);
-
+    // console.log(props);
     return (
     <form onSubmit={ props.handleLogin }>
         <label htmlFor="email">Email</label>

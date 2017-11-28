@@ -1,17 +1,22 @@
 import React from 'react';
 import { Route, Link } from 'react-router-dom';
+import { withRouter } from 'react-router';
 import Home from '../home';
 import About from '../about';
 import Login from '../login';
 import Register from '../register';
 import Feed from '../feed';
 import requireAuthentication from '../../modules/authCheck';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
+import { handleLogout } from '../../modules/auth';
 
-const App = () => (
+const App = (props) => (
     <div>
         <header>
             <Link to="/">Home</Link>
             <Link to="/login">Login</Link>
+            <Link to="/" onClick={ props.handleLogout }>Logout</Link>
             <Link to="/about-us">About</Link>
         </header>
 
@@ -25,4 +30,11 @@ const App = () => (
     </div>
 );
 
-export default App;
+const mapDispatchToProps = (dispatch) => bindActionCreators({
+    handleLogout,
+}, dispatch);
+
+export default withRouter(connect(
+    null,
+    mapDispatchToProps
+)(App));

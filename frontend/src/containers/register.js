@@ -9,19 +9,36 @@ import { handleChange, handleRegister } from '../modules/auth';
 
 const Register = (props) => (
     <form onSubmit={ props.handleRegister }>
+        <label htmlFor="first_name">First Name</label>
+        <input
+            type="text"
+            name="first_name"
+            value={ props.first_name }
+            onChange={ props.handleChange }
+            required="required" />
+
+        <label htmlFor="last_name">Last Name</label>
+        <input
+            type="text"
+            name="last_name"
+            value={ props.last_name }
+            onChange={ props.handleChange } />
+
         <label htmlFor="email">Email</label>
         <input
             type="email"
             name="email"
             value={ props.email }
-            onChange={ props.handleChange } />
+            onChange={ props.handleChange }
+            required="required" />
 
-        <label htmlFor="">Password</label>
+        <label htmlFor="password">Password</label>
         <input
             type="password"
             name="password"
             value={ props.password }
-            onChange={ props.handleChange } />
+            onChange={ props.handleChange }
+            required="required" />
 
         <button type="submit" disabled={ props.isAuthenticating }>Register</button>
 

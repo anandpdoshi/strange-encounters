@@ -1,9 +1,6 @@
 import os
-from flask import (Flask, render_template, send_from_directory, request)
+from flask import (Flask, render_template, send_from_directory, request, jsonify)
 from flask_sqlalchemy import SQLAlchemy
-from flask_wtf import Form
-from wtforms import StringField, SubmitField, SelectField, BooleanField, PasswordField
-from wtforms.validators import Required, Length, Email, Regexp, EqualTo
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from flask_sslify import SSLify
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -32,17 +29,12 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+app.config['SECRET_KEY'] = os.environ['SE_SECRET_KEY']
+
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.session_protection = 'strong'
 login_manager.login_view = 'login'
-
-
-class LoginForm(Form):
-    email = StringField('Email', validators=[Required(), Length(1, 64), Email()])
-    password = PasswordField('Password', validators=[Required()])
-    remember_me = BooleanField('Keep me logged in')
-    # submit = SubmitField('Log In')
 
 
 @app.route('/')
@@ -51,31 +43,68 @@ def index():
 
 @app.route('/api/auth/register', methods=['POST'])
 def register():
+    # TODO handle user already exists
+    # Exception example
+    # sqlalchemy.exc.IntegrityError: (psycopg2.IntegrityError) duplicate key value violates unique constraint "ix_users_email"
+    # DETAIL:  Key (email)=(anandpd@umich.edu) already exists.
+    #  [SQL: 'INSERT INTO users (first_name, last_name, email, password_hash) VALUES (%(first_name)s, %(last_name)s, %(email)s, %(password_hash)s) RETURNING users.id'] [parameters: {'first_name': 'Anand', 'last_name': 'Doshi', 'email': 'anandpd@umich.edu', 'password_hash': 'pbkdf2:sha256:50000$e0aTWFvA$572efc270a3155d8d22eb30d699be8afdeaa21769efff11e0c4bb147fb032e6f'}]
+
+    import model
     print(request.form)
-    return json.dumps({
-        'status': 'request received'
+    form = request.form
+
+    user = model.User(
+        first_name=form['first_name'],
+        last_name=form['last_name'],
+        email=form['email'],
+        password=form['password']
+    )
+    db.session.add(user)
+
+    login_user(user)
+
+    return jsonify({
+        'status': 'REGISTRATION_SUCCESS'
     })
+
 
 @app.route('/api/auth/login', methods=['POST'])
 def login():
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
-        if user is not None and user.verify_password(form.password.data):
-            login_user(user, form.remember_me.data)
-            return redirect(request.args.get('next') or '/')
-        else:
-            # TODO raise exception
-            flash('Invalid username or password.')
+    from model import User
+    form = request.form
+    print(form)
+
+    user = User.query.filter_by(email=form['email']).first()
+    if user is not None and user.verify_password(form['password']):
+        login_user(user, form.get('remember_me', 0))
+        return jsonify({
+            'status': 'LOGIN_SUCCESS'
+        })
+        # return redirect(request.args.get('next') or '/')
+    else:
+        return jsonify({
+            'status': 'LOGIN_FAILURE',
+            'msg': 'Invalid username or password.'
+        })
+        # TODO raise exception
+        # flash('Invalid username or password.')
 
 
-@app.route('/api/auth/logout')
+@login_manager.user_loader
+def load_user(user_id):
+    from model import User
+    return User.query.get(int(user_id))
+
+
+@app.route('/api/auth/logout', methods=['POST'])
 @login_required
 def logout():
     logout_user()
     # TODO show correct message?
     # flash('You have been logged out')
-    return redirect('/')
+    return jsonify({
+        'status': 'LOGOUT_SUCCESS'
+    })
 
 
 @app.route('/api')

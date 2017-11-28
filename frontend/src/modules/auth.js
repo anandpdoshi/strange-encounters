@@ -1,4 +1,5 @@
 import request from 'superagent';
+import { push } from 'react-router-redux';
 
 export const LOGIN_REQUESTED = 'auth/LOGIN_REQUESTED';
 export const LOGIN_SUCCESS = 'auth/LOGIN_SUCCESS';
@@ -14,6 +15,8 @@ export const REGISTRATION_FAILURE = 'auth/REGISTRATION_FAILURE';
 const initialState = {
     email: '',
     password: '',
+    first_name: '',
+    last_name: '',
     token: '',
     isAuthenticating: false,
     isAuthenticated: false,
@@ -96,9 +99,86 @@ export const handleChange = (event) => {
     }
 }
 
-export const handleLogin = () => {
+export const handleLogin = (event) => {
+    event.preventDefault();
+    return (dispatch, getState) => {
+        dispatch({
+            type: LOGIN_REQUESTED
+        });
 
-}
+        const authState = getState().auth;
+        console.log(authState);
+
+        request
+            .post('/api/auth/login')
+            .send({
+                email: authState.email,
+                password: authState.password
+            })
+            .set('Content-Type', 'application/x-www-form-urlencoded')
+            .set('accept', 'json')
+            .end((err, res) => {
+
+                if (err) {
+                    console.error(err.text);
+                } else if (res) {
+                    // console.log(res);
+                    if (res.body.status==='LOGIN_SUCCESS') {
+                        dispatch({
+                            type: LOGIN_SUCCESS
+                        });
+                        dispatch(push('/'));
+                    } else {
+                        dispatch({
+                            type: LOGIN_FAILURE,
+                            payload: {
+                                status: res.body.status,
+                                statusText: res.body.msg
+                            }
+                        });
+                        alert(res.body.msg);
+                    }
+                }
+            });
+
+    };
+};
+
+export const handleLogout = (event) => {
+    event.preventDefault();
+    return (dispatch) => {
+        dispatch({
+            type: LOGOUT_REQUESTED
+        });
+
+        request
+            .post('/api/auth/logout')
+            .set('Content-Type', 'application/x-www-form-urlencoded')
+            .set('accept', 'json')
+            .end((err, res) => {
+                if (err) {
+                    console.error(err.text);
+                } else if (res) {
+                    // console.log(res);
+                    if (res.body.status==='LOGOUT_SUCCESS') {
+                        dispatch({
+                            type: LOGOUT_SUCCESS
+                        });
+                        dispatch(push('/login'));
+                    } else {
+                        dispatch({
+                            type: LOGOUT_FAILURE,
+                            payload: {
+                                status: res.body.status,
+                                statusText: res.body.msg
+                            }
+                        });
+                        alert(res.body.msg);
+                    }
+                }
+            });
+    }
+};
 
 export const handleRegister = (event) => {
     event.preventDefault();
@@ -112,64 +192,35 @@ export const handleRegister = (event) => {
 
         request
             .post('/api/auth/register')
-            .send({ email: authState.email, password: authState.password })
+            .send({
+                email: authState.email,
+                password: authState.password,
+                first_name: authState.first_name,
+                last_name: authState.last_name
+            })
             .set('Content-Type', 'application/x-www-form-urlencoded')
             .set('accept', 'json')
             .end((err, res) => {
-                if (err) console.error(err.text);
-                if (res) console.log(res.text);
+                if (err) {
+                    console.error(err.text);
+                } else if (res) {
+                    // console.log(res);
+                    if (res.body.status==='REGISTRATION_SUCCESS') {
+                        dispatch({
+                            type: REGISTRATION_SUCCESS
+                        });
+                        dispatch(push('/'));
+                    } else {
+                        dispatch({
+                            type: REGISTRATION_FAILURE,
+                            payload: {
+                                status: res.body.status,
+                                statusText: res.body.msg
+                            }
+                        });
+                        alert(res.body.msg);
+                    }
+                }
             });
     }
 };
-
-// export const increment = () => {
-//     return dispatch => {
-//         dispatch({
-//             type: INCREMENT_REQUESTED
-//         });
-//
-//         dispatch({
-//             type: INCREMENT
-//         });
-//     };
-// };
-//
-// export const incrementAsync = () => {
-//     return dispatch => {
-//         dispatch({
-//             type: INCREMENT_REQUESTED
-//         });
-//
-//         return setTimeout(() => {
-//             dispatch({
-//                 type: INCREMENT
-//             });
-//         }, 3000);
-//     };
-// };
-//
-// export const decrement = () => {
-//     return dispatch => {
-//         dispatch({
-//             type: DECREMENT_REQUESTED
-//         });
-//
-//         dispatch({
-//             type: DECREMENT
-//         });
-//     };
-// };
-//
-// export const decrementAsync = () => {
-//     return dispatch => {
-//         dispatch({
-//             type: DECREMENT_REQUESTED
-//         });
-//
-//         return setTimeout(() => {
-//             dispatch({
-//                 type: DECREMENT
-//             });
-//         }, 3000);
-//     };
-// };

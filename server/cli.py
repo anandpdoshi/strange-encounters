@@ -26,6 +26,7 @@ def initdb(createdb):
 
 @click.command()
 def dropdb():
+    import model
     db.drop_all()
     click.echo('Database Cleared')
 

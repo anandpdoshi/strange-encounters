@@ -1,6 +1,5 @@
 flask
 flask_sqlalchemy
-flask_wtf
 psycopg2
 flask_login
 flask_sslify
