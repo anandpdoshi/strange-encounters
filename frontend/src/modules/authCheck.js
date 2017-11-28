@@ -1,23 +1,17 @@
 import React from 'react';
 import { push } from 'react-router-redux';
 import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { checkAuth } from './auth';
 
 const requireAuthentication = (Component) => {
     class AuthenticatedComponent extends React.Component {
         componentWillMount() {
-            this.checkAuth(this.props.isAuthenticated);
+            this.props.checkAuth();
         }
 
         componentWillReceiveProps(nextProps) {
-            this.checkAuth(nextProps.isAuthenticated);
-        }
-
-        checkAuth(isAuthenticated) {
-            if(!isAuthenticated) {
-                // TODO handle this using redux
-                let redirectAfterLogin = this.props.location.pathname;
-                this.props.dispatch(push(`/login?next=${redirectAfterLogin}`));
-            }
+            this.props.checkAuth();
         }
 
         render() {
@@ -39,7 +33,11 @@ const requireAuthentication = (Component) => {
         isAuthenticated: state.auth.isAuthenticated
     });
 
-    return connect(mapStateToProps, null)(AuthenticatedComponent);
+    const mapDispatchToProps = (dispatch) => bindActionCreators({
+        checkAuth,
+    }, dispatch);
+
+    return connect(mapStateToProps, mapDispatchToProps)(AuthenticatedComponent);
 };
 
 export default requireAuthentication;

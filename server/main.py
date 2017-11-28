@@ -106,6 +106,13 @@ def logout():
         'status': 'LOGOUT_SUCCESS'
     })
 
+@app.route('/api/post/new', methods=['POST'])
+@login_required
+def new_post():
+    print(request.form)
+    print(current_user)
+
+    return jsonify({})
 
 @app.route('/api')
 def api():

@@ -1,5 +1,5 @@
-import request from 'superagent';
 import { push } from 'react-router-redux';
+import { submitForm, createHandleChange } from '../utils';
 
 export const LOGIN_REQUESTED = 'auth/LOGIN_REQUESTED';
 export const LOGIN_SUCCESS = 'auth/LOGIN_SUCCESS';
@@ -11,6 +11,8 @@ export const UPDATE_AUTH_FIELD = 'auth/UPDATE_AUTH_FIELD';
 export const REGISTRATION_REQUESTED = 'auth/REGISTRATION_REQUESTED';
 export const REGISTRATION_SUCCESS = 'auth/REGISTRATION_SUCCESS';
 export const REGISTRATION_FAILURE = 'auth/REGISTRATION_FAILURE';
+export const REDIRECT_AFTER_LOGIN = 'auth/REDIRECT_AFTER_LOGIN';
+export const REDIRECTED = 'auth/REDIRECTED';
 
 const initialState = {
     email: '',
@@ -21,7 +23,8 @@ const initialState = {
     isAuthenticating: false,
     isAuthenticated: false,
     status: '',
-    statusText: ''
+    statusText: '',
+    redirectTo: ''
 };
 
 // this is the REDUCER for auth
@@ -75,6 +78,18 @@ export default (state = initialState, action) => {
                 statusText: action.payload.statusText
             };
 
+        case REDIRECT_AFTER_LOGIN:
+            return {
+                ...state,
+                redirectTo: action.payload.redirectTo
+            };
+
+        case REDIRECTED:
+            return {
+                ...state,
+                redirectTo: ''
+            };
+
         default:
             return state;
     }
@@ -83,21 +98,7 @@ export default (state = initialState, action) => {
 // these are functions to dispatch actions
 // aka action creators
 // uses redux-thunk style
-export const handleChange = (event) => {
-    const key = event.target.name;
-    const value = event.target.value;
-    // console.log(key, value);
-
-    return (dispatch) => {
-        dispatch({
-            type: UPDATE_AUTH_FIELD,
-            payload: {
-                key,
-                value
-            }
-        });
-    }
-}
+export const handleChange = createHandleChange(UPDATE_AUTH_FIELD);
 
 export const handleLogin = (event) => {
     event.preventDefault();
@@ -109,37 +110,36 @@ export const handleLogin = (event) => {
         const authState = getState().auth;
         console.log(authState);
 
-        request
-            .post('/api/auth/login')
-            .send({
+        submitForm({
+            endpoint: '/api/auth/login',
+            data: {
                 email: authState.email,
                 password: authState.password
-            })
-            .set('Content-Type', 'application/x-www-form-urlencoded')
-            .set('accept', 'json')
-            .end((err, res) => {
+            },
+            callback: (res) => {
+                // console.log(res);
+                if (res.body.status==='LOGIN_SUCCESS') {
+                    dispatch({
+                        type: LOGIN_SUCCESS
+                    });
 
-                if (err) {
-                    console.error(err.text);
-                } else if (res) {
-                    // console.log(res);
-                    if (res.body.status==='LOGIN_SUCCESS') {
-                        dispatch({
-                            type: LOGIN_SUCCESS
-                        });
-                        dispatch(push('/'));
-                    } else {
-                        dispatch({
-                            type: LOGIN_FAILURE,
-                            payload: {
-                                status: res.body.status,
-                                statusText: res.body.msg
-                            }
-                        });
-                        alert(res.body.msg);
-                    }
+                    dispatch(push(authState.redirectTo || '/'));
+
+                    dispatch({
+                        type: REDIRECTED
+                    });
+                } else {
+                    dispatch({
+                        type: LOGIN_FAILURE,
+                        payload: {
+                            status: res.body.status,
+                            statusText: res.body.msg
+                        }
+                    });
+                    alert(res.body.msg);
                 }
-            });
+            }
+        });
 
     };
 };
@@ -151,32 +151,27 @@ export const handleLogout = (event) => {
             type: LOGOUT_REQUESTED
         });
 
-        request
-            .post('/api/auth/logout')
-            .set('Content-Type', 'application/x-www-form-urlencoded')
-            .set('accept', 'json')
-            .end((err, res) => {
-                if (err) {
-                    console.error(err.text);
-                } else if (res) {
-                    // console.log(res);
-                    if (res.body.status==='LOGOUT_SUCCESS') {
-                        dispatch({
-                            type: LOGOUT_SUCCESS
-                        });
-                        dispatch(push('/login'));
-                    } else {
-                        dispatch({
-                            type: LOGOUT_FAILURE,
-                            payload: {
-                                status: res.body.status,
-                                statusText: res.body.msg
-                            }
-                        });
-                        alert(res.body.msg);
-                    }
+        submitForm({
+            endpoint: '/api/auth/logout',
+            callback: (res) => {
+                // console.log(res);
+                if (res.body.status==='LOGOUT_SUCCESS') {
+                    dispatch({
+                        type: LOGOUT_SUCCESS
+                    });
+                    dispatch(push('/login'));
+                } else {
+                    dispatch({
+                        type: LOGOUT_FAILURE,
+                        payload: {
+                            status: res.body.status,
+                            statusText: res.body.msg
+                        }
+                    });
+                    alert(res.body.msg);
                 }
-            });
+            }
+        });
     }
 };
 
@@ -190,37 +185,56 @@ export const handleRegister = (event) => {
         const authState = getState().auth;
         console.log(authState);
 
-        request
-            .post('/api/auth/register')
-            .send({
+        submitForm({
+            endpoint: '/api/auth/register',
+            data: {
                 email: authState.email,
                 password: authState.password,
                 first_name: authState.first_name,
                 last_name: authState.last_name
-            })
-            .set('Content-Type', 'application/x-www-form-urlencoded')
-            .set('accept', 'json')
-            .end((err, res) => {
-                if (err) {
-                    console.error(err.text);
-                } else if (res) {
-                    // console.log(res);
-                    if (res.body.status==='REGISTRATION_SUCCESS') {
-                        dispatch({
-                            type: REGISTRATION_SUCCESS
-                        });
-                        dispatch(push('/'));
-                    } else {
-                        dispatch({
-                            type: REGISTRATION_FAILURE,
-                            payload: {
-                                status: res.body.status,
-                                statusText: res.body.msg
-                            }
-                        });
-                        alert(res.body.msg);
-                    }
+            },
+            callback: (res) => {
+                // console.log(res);
+                if (res.body.status==='REGISTRATION_SUCCESS') {
+                    dispatch({
+                        type: REGISTRATION_SUCCESS
+                    });
+
+                    dispatch(push(authState.redirectTo || '/'));
+
+                    dispatch({
+                        type: REDIRECTED
+                    });
+                } else {
+                    dispatch({
+                        type: REGISTRATION_FAILURE,
+                        payload: {
+                            status: res.body.status,
+                            statusText: res.body.msg
+                        }
+                    });
+                    alert(res.body.msg);
+                }
+            }
+        });
+    }
+};
+
+
+export const checkAuth = () => {
+    return (dispatch, getState) => {
+        const state = getState();
+        const authState = state.auth;
+        console.log(state, authState);
+        if (!authState.isAuthenticated) {
+            dispatch({
+                type: REDIRECT_AFTER_LOGIN,
+                payload: {
+                    redirectTo: state.routing.location.pathname
                 }
             });
-    }
+
+            dispatch(push('/login'));
+        }
+    };
 };
