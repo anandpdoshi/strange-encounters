@@ -1,5 +1,5 @@
 import os
-from flask import (Flask, render_template, send_from_directory)
+from flask import (Flask, render_template, send_from_directory, request)
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import Form
 from wtforms import StringField, SubmitField, SelectField, BooleanField, PasswordField
@@ -9,6 +9,7 @@ from flask_sslify import SSLify
 from werkzeug.security import generate_password_hash, check_password_hash
 import getpass
 import click
+import json
 
 # initialization
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -48,6 +49,12 @@ class LoginForm(Form):
 def index():
     return app.send_static_file('index.html')
 
+@app.route('/api/auth/register', methods=['POST'])
+def register():
+    print(request.form)
+    return json.dumps({
+        'status': 'request received'
+    })
 
 @app.route('/api/auth/login', methods=['POST'])
 def login():

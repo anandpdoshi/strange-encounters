@@ -31,6 +31,17 @@ cd frontend
 npm start
 ```
 
+### TODO
+- Implement `react-bootstrap`
+
+
 ### References
 
 1. https://codeburst.io/creating-a-full-stack-web-application-with-python-npm-webpack-and-react-8925800503d9
+1. https://medium.com/@notrab/getting-started-with-create-react-app-redux-react-router-redux-thunk-d6a19259f71f
+
+---
+
+### Not Implemented
+- Security
+    - CSRF protection
