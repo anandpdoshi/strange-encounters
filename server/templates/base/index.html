@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+        <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport' />
+
+        <!-- TODO apple icons + favicons -->
+
+        {% include "base/style.html" %}
+
+        <title>{{ title or "Strange Encounters" }}</title>
+    </head>
+    <body class="sidebar-collapse">
+        <div id="app">
+            {% include "base/nav.html" %}
+            {% block content %}{% endblock %}
+        </div>
+        {% include "base/scripts.html" %}
+        {% block script %}{% endblock %}
+    </body>
+</html>

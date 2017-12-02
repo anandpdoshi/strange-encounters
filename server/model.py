@@ -1,20 +1,38 @@
-from main import app, db
+import os
+from main import app
+from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 
+# database
+db_connection_string = 'postgresql+psycopg2://{user}:{password}@{hostname}:{port}/{db_name}'
+db_connection_params = dict(
+    user=os.environ.get('RDS_USERNAME', 'postgres'),
+    password=os.environ.get('RDS_PASSWORD', ''),
+    hostname=os.environ.get('RDS_HOSTNAME', 'localhost'),
+    port=os.environ.get('RDS_PORT', 5432),
+    db_name=os.environ.get('RDS_DB_NAME', 'strange_encounters')
+)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = db_connection_string.format(**db_connection_params)
+app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+
 class Post(db.Model):
     __tablename__ = 'post'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    content = db.Column(db.Text, nullable=False)
-    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow, nullable=False)
+    id = db.Column( db.Integer, primary_key=True, autoincrement=True )
+    user_id = db.Column( db.Integer, db.ForeignKey('users.id'), nullable=False )
+    content = db.Column( db.Text, nullable=False )
+    timestamp = db.Column(
+        db.DateTime,
+        index=True,
+        default=datetime.utcnow,
+        nullable=False
+    )
     # location
-
-    # first_name = db.Column(db.String(255), nullable=False)
-    # last_name = db.Column(db.String(255))
-    # email = db.Column(db.String(255), unique=True, index=True)
-    # password_hash = db.Column(db.String(255))
 
 
 # class Location
@@ -22,12 +40,13 @@ class Post(db.Model):
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    first_name = db.Column(db.String(255), nullable=False)
-    last_name = db.Column(db.String(255))
-    email = db.Column(db.String(255), unique=True, index=True)
-    password_hash = db.Column(db.String(255))
-    posts = db.relationship('Post',
+    id = db.Column( db.Integer, primary_key=True, autoincrement=True )
+    first_name = db.Column( db.String(255), nullable=False )
+    last_name = db.Column( db.String(255) )
+    email = db.Column( db.String(255), unique=True, index=True )
+    password_hash = db.Column( db.String(255) )
+    posts = db.relationship(
+        'Post',
         foreign_keys=[Post.user_id],
         backref=db.backref('user', lazy='joined'),
         lazy='dynamic',

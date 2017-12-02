@@ -1,5 +1,6 @@
 import click
-from main import (app, db, db_connection_string, db_connection_params)
+from main import app
+from model import ( db, db_connection_string, db_connection_params )
 
 
 @click.group()

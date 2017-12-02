@@ -1,33 +1,161 @@
-<!doctype html>
-<html lang="en">
-    <head>
-        <title>Hello, world!</title>
-        <!-- Required meta tags -->
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+{% extends "base/index.html" %}
 
-        <!-- Bootstrap CSS -->
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+{% block content %}
+<!-- route outlet -->
+<!-- component matched by the route will render here -->
+<router-view v-on:login="setAuthenticated"></router-view>
+{% endblock %}
 
-    </head>
-    <body>
-        <div id="root">
+{% block script %}
+<script type="text/x-template" id="login-template">
+    {% include "components/login.html" %}
+</script>
 
-        </div>
+<script type="text/babel">
+    // 0. If using a module system (e.g. via vue-cli), import Vue and VueRouter
+    // and then call `Vue.use(VueRouter)`.
+    Vue.use(VueRouter);
 
-        <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
-        <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
-        <script type="text/javascript">
-            ReactDOM.render(
-                '<h1>Hello, world!</h1>',
-                document.getElementById('root')
-            );
-        </script>
+    // 1. Define route components.
+    // These can be imported from other files
+    const Login = {
+        template: '#login-template',
+        data: function() {
+            return {
+                email: '',
+                password: '',
+                firstName: '',
+                lastName: '',
+                wantsToRegister: false,
+                redirectTo: '',
+            }
+        },
+        methods: {
+            toggleRegister: function() {
+                this.wantsToRegister = !this.wantsToRegister;
+            },
+            login: function() {
+                // TODO validate
+                var me = this;
+                $.ajax({
+                    url: '/api/auth/login',
+                    method: 'POST',
+                    data: {
+                        email: this.email,
+                        password: this.password
+                    },
 
-        <!-- Optional JavaScript -->
-        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-        <!-- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script> -->
-        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script> -->
-        <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script> -->
-    </body>
-</html>
+                    success: function(data) {
+                        console.log(data);
+                        if (data.status == 'success') {
+                            // go to home
+                            me.$emit('login');
+                            me.$router.push('/');
+                        } else if (data.status == 'failure') {
+                            alert(data.msg);
+                        } else {
+                            console.error('No response');
+                        }
+                    },
+
+                    error: function() {
+                        console.error('error!');
+                    }
+                });
+            },
+            register: function() {
+                // TODO validate
+                var me = this;
+                $.ajax({
+                    url: '/api/auth/register',
+                    method: 'POST',
+                    data: {
+                        email: this.email,
+                        password: this.password,
+                        first_name: this.firstName,
+                        last_name: this.lastName
+                    },
+
+                    success: function(data) {
+                        console.log(data);
+                        if (data.status == 'success') {
+                            // go to home
+                            me.$emit('login');
+                            me.$router.push('/');
+                        } else if (data.status == 'failure') {
+                            alert(data.msg);
+                        } else {
+                            console.error('No response');
+                        }
+                    },
+
+                    error: function() {
+                        console.error('error!');
+                    }
+                });
+            },
+        }
+    };
+
+    // 2. Define some routes
+    // Each route should map to a component. The "component" can
+    // either be an actual component constructor created via
+    // `Vue.extend()`, or just a component options object.
+    // We'll talk about nested routes later.
+    const routes = [
+        { path: '/login', component: Login },
+    ];
+
+    // 3. Create the router instance and pass the `routes` option
+    // You can pass in additional options here, but let's
+    // keep it simple for now.
+    const router = new VueRouter({
+        routes // short for `routes: routes`
+    })
+
+    // 4. Create and mount the root instance.
+    // Make sure to inject the router with the router option to make the
+    // whole app router-aware.
+    const app = new Vue({
+        router,
+        data: {
+            isAuthenticated: false
+        },
+        created: function() {
+            this.setAuthenticated();
+        },
+        methods: {
+            setAuthenticated: function() {
+                this.isAuthenticated = document.cookie.indexOf("authorized=1")!==-1;
+                console.log('isAuthenticated?', this.isAuthenticated);
+            },
+            logout: function() {
+                var me = this;
+                $.ajax({
+                    url: '/api/auth/logout',
+                    method: 'POST',
+
+                    success: function(data) {
+                        console.log(data);
+                        if (data.status == 'success') {
+                            // go to home
+                            me.setAuthenticated();
+                            me.$router.push('/login');
+                        } else if (data.status == 'failure') {
+                            alert(data.msg);
+                        } else {
+                            console.error('No response');
+                        }
+                    },
+
+                    error: function() {
+                        console.error('error!');
+                    }
+                })
+            }
+        }
+    }).$mount('#app')
+
+    // Now the app has started!
+</script>
+{% endblock %}

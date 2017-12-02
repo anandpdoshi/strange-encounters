@@ -1,0 +1,83 @@
+<div class="login-page">
+    <div class="page-header" filter-color="orange">
+        <!-- TODO change image -->
+        <div class="page-header-image" style="background-image:url(../assets/img/login.jpg)"></div>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 col-lg-4 content-center">
+                    <div class="card card-login card-plain">
+                        <form class="form" method="" action="">
+                            <div class="header header-primary text-center">
+                                <div class="logo-container">
+                                    <!-- <img src="../assets/img/now-logo.png" alt=""> -->
+                                    <h3>SE</h3>
+                                </div>
+                            </div>
+                            <div class="content">
+                                <div class="input-group form-group-no-border input-lg">
+                                    <span class="input-group-addon">
+                                        <!-- <i class="now-ui-icons users_single-02"></i> -->
+                                        <i class="now-ui-icons ui-1_email-85"></i>
+                                    </span>
+                                    <input type="email" v-model="email"
+                                        class="form-control" placeholder="Email">
+                                </div>
+                                <div class="input-group form-group-no-border input-lg">
+                                    <span class="input-group-addon">
+                                        <i class="now-ui-icons objects_key-25"></i>
+                                    </span>
+                                    <input type="password" v-model="password"
+                                        class="form-control" placeholder="Password">
+                                </div>
+                                <div class="input-group form-group-no-border input-lg" v-if="wantsToRegister">
+                                    <span class="input-group-addon">
+                                        <i class="now-ui-icons users_circle-08"></i>
+                                    </span>
+                                    <input type="text" v-model="firstName"
+                                        class="form-control" placeholder="First Name...">
+                                </div>
+                                <div class="input-group form-group-no-border input-lg" v-if="wantsToRegister">
+                                    <span class="input-group-addon">
+                                        <i class="now-ui-icons text_caps-small"></i>
+                                    </span>
+                                    <input type="text" v-model="lastName"
+                                        placeholder="Last Name..." class="form-control" />
+                                </div>
+                            </div>
+                            <div v-if="wantsToRegister">
+                                <div class="footer text-center">
+                                    <a href="javascript:void(0)" v-on:click="register"
+                                        class="btn btn-primary btn-round btn-lg btn-block">
+                                        Register</a>
+                                </div>
+                                <div class="text-center">
+                                    <h6>
+                                        <a href="javascript:void(0)" v-on:click="toggleRegister"
+                                            class="link">Login</a>
+                                    </h6>
+                                </div>
+                            </div>
+                            <div v-else>
+                                <div class="footer text-center">
+                                    <a href="javascript:void(0)" v-on:click="login"
+                                        class="btn btn-primary btn-round btn-lg btn-block">Login</a>
+                                </div>
+                                <div class="pull-left">
+                                    <h6>
+                                        <a href="javascript:void(0)" v-on:click="toggleRegister"
+                                            class="link">Register</a>
+                                    </h6>
+                                </div>
+                                <div class="pull-right">
+                                    <h6>
+                                        <a href="#pablo" class="link">Forgot Password?</a>
+                                    </h6>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
