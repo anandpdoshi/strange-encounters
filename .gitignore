@@ -1,5 +1,6 @@
 .DS_Store
 env/
 frontend.bak/
-
 venv/
+server/config.py
+__pycache__/
