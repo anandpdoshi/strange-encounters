@@ -92,6 +92,8 @@ def register():
         user = model.User.query.filter_by(email=form['email']).first()
         login_user(user, form.get('remember_me', 0))
 
-        return jsonify({
+        response = jsonify({
             'status': 'success'
         })
+        response.set_cookie('authorized', value="1")
+        return response
