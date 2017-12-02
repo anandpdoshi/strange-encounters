@@ -109,10 +109,19 @@ def logout():
 @app.route('/api/post/new', methods=['POST'])
 @login_required
 def new_post():
+    # TODO validations, new post failure
+    from model import Post
     print(request.form)
     print(current_user)
+    new_post = Post(
+        content=request.form['content'],
+        user=current_user._get_current_object()
+    )
+    db.session.add(new_post)
 
-    return jsonify({})
+    return jsonify({
+        'status': 'NEW_POST_SUCCESS'
+    })
 
 @app.route('/api')
 def api():

@@ -64,7 +64,15 @@ export const createPost = (event) => {
                 content: newPostState.content
             },
             callback: (res) => {
-                console.log(res);
+                if (res.status == 'NEW_POST_SUCCESS') {
+                    dispatch({
+                        type: NEW_POST_SUCCESS
+                    });
+                } else if (res.status == 'NEW_POST_FAILURE') {
+                    dispatch({
+                        type: NEW_POST_FAILURE
+                    });
+                }
             }
         });
     }

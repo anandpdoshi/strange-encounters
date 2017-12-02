@@ -14,7 +14,7 @@ import { handleLogout } from '../../modules/auth';
 
 const App = (props) => (
     <div>
-        <header>
+        <header class='nav-header'>
             <Link to="/">Home</Link>
             <Link to="/login">Login</Link>
             <Link to="/" onClick={ props.handleLogout }>Logout</Link>
