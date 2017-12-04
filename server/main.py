@@ -25,7 +25,7 @@ def index():
 @login_required
 def new_post():
     # TODO validations, new post failure
-    from model import Post
+    from model import Post, db
     print(request.form)
     print(current_user)
     new_post = Post(
@@ -33,9 +33,12 @@ def new_post():
         user=current_user._get_current_object()
     )
     db.session.add(new_post)
+    db.session.flush()
+    db.session.refresh(new_post)
 
     return jsonify({
-        'status': 'NEW_POST_SUCCESS'
+        'status': 'success',
+        'id': new_post.id
     })
 
 @app.route('/api')

@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+from geoalchemy2 import Geometry
 
 # database
 db_connection_string = 'postgresql+psycopg2://{user}:{password}@{hostname}:{port}/{db_name}'
@@ -26,6 +27,10 @@ class Post(db.Model):
     id = db.Column( db.Integer, primary_key=True, autoincrement=True )
     user_id = db.Column( db.Integer, db.ForeignKey('users.id'), nullable=False )
     content = db.Column( db.Text, nullable=False )
+    longitude = db.Column( db.NUMERIC )
+    latitude = db.Column( db.NUMERIC )
+    point = db.Column( Geometry("POINT") )
+    address = db.Column( db.Text )
     timestamp = db.Column(
         db.DateTime,
         index=True,

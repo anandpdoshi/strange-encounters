@@ -1,0 +1,16 @@
+.new-post-page textarea {
+    border-radius: 10px !important;
+    color: white !important;
+}
+
+.mapboxgl-canvas {
+    position: inherit !important;
+}
+
+.page {
+    margin-top: 62px;
+}
+
+.page .container {
+    padding-top: 20px;
+}

@@ -1,0 +1,153 @@
+<script type="text/x-template" id="new-post-template">
+<div class="page new-post-page">
+    <div class="page-header" filter-color="orange">
+        <!-- TODO change image -->
+        <!-- <div class="page-header-image" style="background-image:url(../assets/img/login.jpg)"></div> -->
+        <div class="container">
+            <div class="row">
+                <div class="col-md-8 col-lg-6 offset-md-2 offset-lg-3">
+                    <div class="card card-login card-plain">
+                        <form class="form" method="" action="">
+                            <div class="header header-primary text-center">
+                                <div class="logo-container">
+                                    <!-- <img src="../assets/img/now-logo.png" alt=""> -->
+                                    <h3>New Post</h3>
+                                </div>
+                            </div>
+                            <div class="content">
+                                <div class="input-group form-group-no-border input-lg">
+                                    <textarea v-model="content"
+                                        class="form-control" placeholder="Start typing..." rows="5"></textarea>
+                                </div>
+                                <div class="footer text-center">
+                                    <a href="javascript:void(0)" v-on:click="createPost"
+                                        class="btn btn-primary btn-round btn-lg btn-block">Create Post</a>
+                                </div>
+                            </div>
+                        </form>
+
+                        <div v-if="!longitude">
+                            <p><i class="now-ui-icons location_pin"></i> Getting your location ...</p>
+                        </div>
+                        <p>@{ address }</p>
+                        <div id='map' style='height: 300px;'></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</script>
+
+<script type="text/babel">
+// 1. Define route components.
+// These can be imported from other files
+const NewPost = {
+    template: '#new-post-template',
+
+    data: function() {
+        return {
+            content: '',
+            longitude: null,
+            latitude: null,
+            address: ''
+        }
+    },
+
+    delimiters: ['@{', '}'],
+
+    mounted: function() {
+        var component = this;
+
+        mapboxgl.accessToken = 'pk.eyJ1IjoiYW5hbmRwZCIsImEiOiJjajl0N2hkeHcwMDF3MnducnJjdWYyZjVhIn0.MD3oCzM56eeo5fusBY0iaA';
+
+        navigator.geolocation.getCurrentPosition(
+            function success(position) {
+                var latitude  = position.coords.latitude;
+                var longitude = position.coords.longitude;
+                component.setLocation(latitude, longitude);
+
+                console.log(longitude, latitude);
+                var map = new mapboxgl.Map({
+                    container: 'map',
+                    style: 'mapbox://styles/mapbox/light-v9',
+                    center: [longitude, latitude],
+                    minZoom: 16
+                });
+
+                var marker = new mapboxgl.Marker()
+                    .setLngLat([longitude, latitude])
+                    .addTo(map);
+
+                jQuery.ajax({
+                    url: `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json`,
+                    type: 'GET',
+                    data: {
+                        proximity: `${longitude},${latitude}`,
+                        access_token: mapboxgl.accessToken
+
+                    },
+                    crossDomain: true,
+                    success: function(data) {
+                        if (data && data.features && data.features.length) {
+                            data.features.some((d) => {
+                                // console.log(this);
+                                if (d.place_type.includes("address")) {
+                                    component.setLocation(latitude, longitude, d.place_name);
+                                    return true;
+                                }
+                            });
+                        }
+                    }
+                });
+
+
+            },
+            function error(positionError) {
+                console.error(positionError);
+                console.error("Unable to retrieve your location");
+            }
+        );
+    },
+
+    methods: {
+        createPost: function() {
+            // TODO validate
+            var me = this;
+            $.ajax({
+                url: '/api/post/new',
+                method: 'POST',
+                data: {
+                    content: this.content,
+                    latitude: this.latitude,
+                    longitude: this.longitude,
+                    address: this.address
+                },
+
+                success: function(data) {
+                    console.log(data);
+                    if (data.status == 'success') {
+                        console.log(data);
+                        // me.$router.push('/my-posts');
+                    } else if (data.status == 'failure') {
+                        alert(data.msg);
+                    } else {
+                        console.error('No response');
+                    }
+                },
+
+                error: function() {
+                    console.error('error!');
+                }
+            });
+        },
+
+        setLocation: function(longitude, latitude, address) {
+            console.log(longitude, latitude, address);
+            this.longitude = longitude;
+            this.latitude = latitude;
+            this.address = address;
+        }
+    }
+};
+</script>

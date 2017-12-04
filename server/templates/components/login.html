@@ -1,3 +1,4 @@
+<script type="text/x-template" id="login-template">
 <div class="login-page">
     <div class="page-header" filter-color="orange">
         <!-- TODO change image -->
@@ -27,7 +28,8 @@
                                         <i class="now-ui-icons objects_key-25"></i>
                                     </span>
                                     <input type="password" v-model="password"
-                                        class="form-control" placeholder="Password">
+                                        class="form-control" placeholder="Password"
+                                        v-on:keyup.13="login">
                                 </div>
                                 <div class="input-group form-group-no-border input-lg" v-if="wantsToRegister">
                                     <span class="input-group-addon">
@@ -70,7 +72,7 @@
                                 </div>
                                 <div class="pull-right">
                                     <h6>
-                                        <a href="#pablo" class="link">Forgot Password?</a>
+                                        <a href="javascript:void(0)" class="link">Forgot Password?</a>
                                     </h6>
                                 </div>
                             </div>
@@ -81,3 +83,89 @@
         </div>
     </div>
 </div>
+</script>
+
+<script type="text/babel">
+// 1. Define route components.
+// These can be imported from other files
+const Login = {
+    template: '#login-template',
+    data: function() {
+        return {
+            email: '',
+            password: '',
+            firstName: '',
+            lastName: '',
+            wantsToRegister: false,
+            redirect: '',
+        }
+    },
+    methods: {
+        toggleRegister: function() {
+            this.wantsToRegister = !this.wantsToRegister;
+        },
+        login: function() {
+            // TODO validate
+            var me = this;
+            $.ajax({
+                url: '/api/auth/login',
+                method: 'POST',
+                data: {
+                    email: this.email,
+                    password: this.password
+                },
+
+                success: function(data) {
+                    console.log(data);
+                    if (data.status == 'success') {
+                        // go to home
+                        me.$emit('login');
+                        me.$router.push(me.redirect || '/');
+                        me.redirect = '';
+                    } else if (data.status == 'failure') {
+                        alert(data.msg);
+                    } else {
+                        console.error('No response');
+                    }
+                },
+
+                error: function() {
+                    console.error('error!');
+                }
+            });
+        },
+        register: function() {
+            // TODO validate
+            var me = this;
+            $.ajax({
+                url: '/api/auth/register',
+                method: 'POST',
+                data: {
+                    email: this.email,
+                    password: this.password,
+                    first_name: this.firstName,
+                    last_name: this.lastName
+                },
+
+                success: function(data) {
+                    console.log(data);
+                    if (data.status == 'success') {
+                        // go to home
+                        me.$emit('login');
+                        me.$router.push(me.redirect || '/');
+                        me.redirect = '';
+                    } else if (data.status == 'failure') {
+                        alert(data.msg);
+                    } else {
+                        console.error('No response');
+                    }
+                },
+
+                error: function() {
+                    console.error('error!');
+                }
+            });
+        },
+    }
+};
+</script>

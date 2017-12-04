@@ -19,6 +19,7 @@ def initdb(createdb):
         with db.create_engine(db_uri).connect() as conn:
             conn.execute('commit')
             conn.execute('CREATE DATABASE strange_encounters')
+            conn.execute('CREATE EXTENSION postgis')
 
     import model
     db.create_all()

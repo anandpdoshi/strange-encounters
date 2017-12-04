@@ -1,5 +1,6 @@
 flask
 flask_sqlalchemy
+GeoAlchemy2
 psycopg2
 flask_login
 flask_sslify
