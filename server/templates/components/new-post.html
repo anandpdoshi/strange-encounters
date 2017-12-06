@@ -26,11 +26,13 @@
                             </div>
                         </form>
 
+
                         <div v-if="!longitude">
                             <p><i class="now-ui-icons location_pin"></i> Getting your location ...</p>
                         </div>
-                        <p>@{ address }</p>
                         <div id='map' style='height: 300px;'></div>
+                        <br>
+                        <p>@{ address }</p>
                     </div>
                 </div>
             </div>
@@ -65,9 +67,10 @@ const NewPost = {
             function success(position) {
                 var latitude  = position.coords.latitude;
                 var longitude = position.coords.longitude;
-                component.setLocation(latitude, longitude);
+                component.setLocation(longitude, latitude);
 
                 console.log(longitude, latitude);
+
                 var map = new mapboxgl.Map({
                     container: 'map',
                     style: 'mapbox://styles/mapbox/light-v9',
@@ -79,28 +82,8 @@ const NewPost = {
                     .setLngLat([longitude, latitude])
                     .addTo(map);
 
-                jQuery.ajax({
-                    url: `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json`,
-                    type: 'GET',
-                    data: {
-                        proximity: `${longitude},${latitude}`,
-                        access_token: mapboxgl.accessToken
-
-                    },
-                    crossDomain: true,
-                    success: function(data) {
-                        if (data && data.features && data.features.length) {
-                            data.features.some((d) => {
-                                // console.log(this);
-                                if (d.place_type.includes("address")) {
-                                    component.setLocation(latitude, longitude, d.place_name);
-                                    return true;
-                                }
-                            });
-                        }
-                    }
-                });
-
+                component.getLocation();
+                component.setupDraggableMarker(map, marker);
 
             },
             function error(positionError) {
@@ -125,7 +108,7 @@ const NewPost = {
                 },
 
                 success: function(data) {
-                    console.log(data);
+                    // console.log(data);
                     if (data.status == 'success') {
                         console.log(data);
                         // me.$router.push('/my-posts');
@@ -142,11 +125,85 @@ const NewPost = {
             });
         },
 
+        getLocation: function() {
+            var me = this;
+            var longitude = this.longitude;
+            var latitude = this.latitude;
+            jQuery.ajax({
+                url: `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json`,
+                type: 'GET',
+                data: {
+                    proximity: `${longitude},${latitude}`,
+                    access_token: mapboxgl.accessToken
+
+                },
+                crossDomain: true,
+                success: function(data) {
+                    // console.log(data);
+                    if (data && data.features && data.features.length) {
+                        data.features.some((d) => {
+                            // console.log(this);
+                            if (d.place_type.includes("address")) {
+                                me.setLocation(latitude, longitude, d.place_name);
+                                return true;
+                            }
+                        });
+                    }
+                }
+            });
+        },
+
         setLocation: function(longitude, latitude, address) {
             console.log(longitude, latitude, address);
             this.longitude = longitude;
             this.latitude = latitude;
             this.address = address;
+        },
+
+        setupDraggableMarker: function(map, marker) {
+            var component = this;
+
+            marker.getElement().setAttribute('id', 'marker');
+
+            // console.log(marker.getElement());
+
+            function setMarker() {
+                marker.setLngLat(map.getCenter());
+            }
+
+            function changeLocation() {
+                var center = map.getCenter();
+                marker.setLngLat(center);
+                component.setLocation(center.lng, center.lat);
+                component.getLocation();
+            }
+
+
+            map.on('mouseup', function() {
+                // console.log('mouseup');
+                changeLocation();
+            });
+
+            map.on('drag', function() {
+                // console.log('dragging', map.getCenter());
+                setMarker();
+            });
+
+            map.on('touchmove', function() {
+                console.log('touchmove');
+                changeLocation();
+            });
+
+            var touchTimeout;
+
+            map.on('touchend', function() {
+                console.log('touchend');
+                touchTimeout && clearTimeout(touchTimeout);
+                touchTimeout = setTimeout(function() {
+                    changeLocation();
+                }, 2000);
+            });
+
         }
     }
 };
