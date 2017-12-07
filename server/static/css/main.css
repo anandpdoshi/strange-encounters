@@ -14,3 +14,30 @@
 .page .container {
     padding-top: 20px;
 }
+
+.close {
+    font-weight: 100;
+    font-size: 4rem;
+}
+
+.feed-page .btn-for-modal {
+    max-width: 300px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.feed-head-buttons {
+    margin-bottom: 30px;
+}
+
+.feed-card {
+    margin-top: 15px;
+    padding: 30px;
+    padding-bottom: 0;
+    font-size: 1.2rem;
+    font-family: sans-serif;
+    font-weight: 300;
+    /*background-color: RGBA(247, 99, 60, 0.05);*/
+    border: 1px solid RGBA(247, 99, 60, 1);
+}

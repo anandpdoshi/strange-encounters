@@ -1,6 +1,62 @@
 <script type="text/x-template" id="feed-template">
-<div class="feed-page">
-    
+<div class="page feed-page">
+    <!-- Modal Core -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+    <div class="modal-content">
+          <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Change Address</h4>
+          </div>
+          <div class="modal-body">
+                <div id='map'></div>
+                <br>
+                <p>@{ address }</p>
+          </div>
+          <div class="modal-footer">
+                <button type="button" class="btn btn-default btn-simple" data-dismiss="modal">Close</button>
+                <!-- <button type="button" class="btn btn-info btn-simple">Save</button> -->
+          </div>
+    </div>
+    </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col feed-head-buttons">
+                <!-- Button trigger modal -->
+                <button class="btn btn-neutral btn-for-modal" data-toggle="modal" data-target="#myModal">
+                <i class="now-ui-icons location_pin"></i> @{ address }
+                </button>
+
+                <button class="btn btn-default btn-icon  btn-icon-mini btn-round btn-simple" v-on:click="loadFeed" v-if="address != 'Loading Address ...'">
+                <i class="now-ui-icons arrows-1_refresh-69"></i></button>
+
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6" v-for="d in feed">
+            <div class="card feed-card">
+                <p>
+                    @{ d.content }
+
+                    <span v-if="d.first_name">
+                        <br>
+                        <small class='text-muted'>—@{ d.first_name }</small>
+                    </span>
+
+
+                </p>
+            </div>
+            </div>
+        </div>
+
+    </div>
+
+
+
+
 </div>
 </script>
 
@@ -10,14 +66,70 @@
 const Feed = {
     template: '#feed-template',
 
+    delimiters: ['@{', '}'],
+
+    mounted: function() {
+        console.log('mount');
+        var component = this;
+        onMountLoadMap(this, function(map, marker) {
+            console.log('loading feed');
+            component.loadFeed();
+
+            console.log($('#modal'));
+
+            // TODO not working!
+            $(".feed-page").on('hide.bs.modal', '#modal', function(event) {
+                console.log('hidden event fired!');
+                component.loadFeed();
+            });
+        });
+    },
+
     data: function() {
         return {
-
+            longitude: null,
+            latitude: null,
+            address: 'Loading Address ...',
+            feed: []
         }
     },
 
     methods: {
+        loadFeed: function() {
+            var component = this;
+            $.ajax({
+                url: '/api/post/feed',
+                method: 'POST',
+                data: {
+                    latitude: this.latitude,
+                    longitude: this.longitude,
+                    address: this.address
+                },
 
+                success: function(data) {
+                    console.log(data);
+                    if (data.status == 'success') {
+                        console.log(data);
+                        component.feed = data.feed;
+                    } else if (data.status == 'failure') {
+                        alert(data.msg);
+                    } else {
+                        console.error('No response');
+                    }
+                },
+
+                error: function() {
+                    console.error('error!');
+                }
+            });
+        },
+
+        setLocation: function(longitude, latitude, address) {
+            console.log(longitude, latitude, address);
+            this.longitude = longitude;
+            this.latitude = latitude;
+            this.address = address;
+        },
     }
 };
 </script>

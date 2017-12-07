@@ -1,6 +1,6 @@
 import os
 from main import app
-from flask import (request, jsonify)
+from flask import (request, jsonify, redirect)
 from flask_login import (LoginManager, UserMixin, login_user, logout_user, login_required, current_user)
 from sqlalchemy.exc import IntegrityError
 import model
@@ -9,7 +9,7 @@ app.config['SECRET_KEY'] = os.environ['SE_SECRET_KEY']
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.session_protection = 'strong'
-login_manager.login_view = '/'
+# login_manager.login_view = '/'
 
 
 @login_manager.user_loader
@@ -97,3 +97,11 @@ def register():
         })
         response.set_cookie('authorized', value="1")
         return response
+
+
+def on_unauthorized():
+    response = redirect('/#/login')
+    response.set_cookie('authorized', '', expires=0)
+    return response
+
+login_manager.unauthorized_handler(on_unauthorized)

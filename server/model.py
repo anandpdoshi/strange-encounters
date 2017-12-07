@@ -37,7 +37,22 @@ class Post(db.Model):
         default=datetime.utcnow,
         nullable=False
     )
-    # location
+
+    def to_json(self):
+        first_name = ''
+        user = User.query.get(int(self.user_id))
+        if user:
+            first_name = user.first_name
+
+        json_user = {
+            'user_id': self.user_id,
+            'content': self.content,
+            'longitude': float(self.longitude),
+            'latitude':float( self.latitude),
+            'address': self.address,
+            'first_name': first_name
+        }
+        return json_user
 
 
 # class Location
