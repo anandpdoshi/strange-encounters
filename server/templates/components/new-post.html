@@ -82,7 +82,7 @@ const NewPost = {
                     if (data.status == 'success') {
                         console.log(data);
                         // TODO go to post page
-                        // me.$router.push('/my-posts');
+                        me.$router.push('/');
                     } else if (data.status == 'failure') {
                         alert(data.msg);
                     } else {
