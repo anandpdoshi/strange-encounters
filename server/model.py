@@ -13,7 +13,7 @@ db_connection_params = dict(
     password=os.environ.get('RDS_PASSWORD', ''),
     hostname=os.environ.get('RDS_HOSTNAME', 'localhost'),
     port=os.environ.get('RDS_PORT', 5432),
-    db_name=os.environ.get('RDS_DB_NAME', 'strange_encounters')
+    db_name=os.environ.get('RDS_DB_NAME', 'babble')
 )
 
 app.config['SQLALCHEMY_DATABASE_URI'] = db_connection_string.format(**db_connection_params)
