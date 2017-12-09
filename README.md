@@ -1,5 +1,13 @@
 # Babble
 
+### Screenshots
+
+<img src="server/static/screenshots/babble-1.png" style="max-width: 32%;">
+<img src="server/static/screenshots/babble-2.png" style="max-width: 32%;">
+<img src="server/static/screenshots/babble-3.png" style="max-width: 32%;">
+<img src="server/static/screenshots/babble-4.png" style="max-width: 32%;">
+<img src="server/static/screenshots/babble-5.png" style="max-width: 32%;">
+
 ### Dependencies
 - Python 3
 - VirtualEnv
@@ -78,6 +86,12 @@ python strange_encounters/main.py
 
         sudo mkdir -p /var/log/uwsgi
         sudo chown -R babble:babble /var/log/uwsgi
+
+        sudo apt-get update
+        sudo apt-get install software-properties-common
+        sudo add-apt-repository ppa:certbot/certbot
+        sudo apt-get update
+        sudo apt-get install python-certbot-nginx
 
         cd ~/strange-encounters
         source venv/bin/activate
